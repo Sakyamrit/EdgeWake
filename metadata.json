@@ -1,0 +1,6 @@
+{
+  "name": "EDGEWAKE",
+  "description": "Low-latency on-device voice activator monitoring dashboard and benchmark evaluation suite.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
