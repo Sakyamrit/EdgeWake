@@ -1,23 +1,24 @@
 import React, { useState } from 'react';
-import { 
-  X, 
-  ArrowUpCircle, 
-  CheckCircle2, 
-  Cpu, 
-  Shield, 
-  List, 
-  HelpCircle, 
-  FileText, 
-  Volume2, 
-  RotateCw, 
-  Check, 
+import {
+  X,
+  ArrowUpCircle,
+  CheckCircle2,
+  Cpu,
+  Shield,
+  List,
+  HelpCircle,
+  FileText,
+  Volume2,
+  RotateCw,
+  Check,
   ExternalLink,
   Copy,
   Zap,
   Lock,
-  Download
+  Download,
+  AlertTriangle,
 } from 'lucide-react';
-import { LogEntry, HardwareConfig } from '../types';
+import { LogEntry, HardwareConfig, DataMode } from '../types';
 
 interface ModalsProps {
   activeModal: 'deploy' | 'logs' | 'hardware' | 'security' | 'support' | 'docs' | 'audio' | null;
@@ -25,6 +26,7 @@ interface ModalsProps {
   logs: LogEntry[];
   onClearLogs: () => void;
   onDeploySuccess?: () => void;
+  dataMode?: DataMode;
 }
 
 export const Modals: React.FC<ModalsProps> = ({
@@ -33,17 +35,20 @@ export const Modals: React.FC<ModalsProps> = ({
   logs,
   onClearLogs,
   onDeploySuccess,
+  dataMode = 'demo',
 }) => {
+  const isDemo = dataMode === 'demo';
+
   // Deploy state
   const [deployStep, setDeployStep] = useState<'idle' | 'flashing' | 'verifying' | 'done'>('idle');
   const [deployProgress, setDeployProgress] = useState(0);
   const [selectedFirmware, setSelectedFirmware] = useState('v2.4.2-quant-int8');
 
-  // Hardware state
+  // Hardware state — values labelled as static config, not live device parameters
   const [hwConfig, setHwConfig] = useState<HardwareConfig>({
-    chipset: 'ESP32-S3 / ARM Cortex-M55',
-    dspCore: 'Xtensa Dual-Core 240MHz',
-    audioFrontend: 'Dual I2S MEMS Mic Array',
+    chipset: 'ESP32-S3',
+    dspCore: 'Xtensa LX7 Dual-Core 240 MHz',
+    audioFrontend: 'INMP441 Single MEMS Mic (I²S)',
     sampleRateHz: 16000,
     bitDepth: 16,
     quantization: 'INT8 Symmetric Per-Tensor',
@@ -67,6 +72,17 @@ export const Modals: React.FC<ModalsProps> = ({
   const [logSearch, setLogSearch] = useState('');
 
   if (!activeModal) return null;
+
+  // Demo-mode disclaimer banner (top of body for any non-logs modal)
+  const DemoBanner: React.FC<{ message: string }> = ({ message }) => (
+    <div className="flex items-start gap-2 rounded-lg border border-[#ffd29f]/30 bg-[#ffd29f]/5 p-2.5 text-[11px] text-[#ffd29f] mb-1">
+      <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+      <div>
+        <span className="font-bold tracking-wider uppercase mr-1">Demo action</span>
+        {message}
+      </div>
+    </div>
+  );
 
   const startDeploy = () => {
     setDeployStep('flashing');
@@ -152,6 +168,9 @@ export const Modals: React.FC<ModalsProps> = ({
           {/* DEPLOY MODAL */}
           {activeModal === 'deploy' && (
             <div className="space-y-4">
+              {isDemo && (
+                <DemoBanner message="OTA not connected to live device. Clicking 'Begin OTA Flashing Sequence' will simulate a flashed firmware update and tweak demo metrics only — no device is contacted." />
+              )}
               <p className="text-xs text-[#bacac5]">
                 Flash optimized keyword spotting (KWS) acoustic models and DSP firmware directly to connected node <strong className="text-[#57f1db]">EdgeWake-01</strong> over secure BLE / UART channel.
               </p>
@@ -245,28 +264,40 @@ export const Modals: React.FC<ModalsProps> = ({
           {/* HARDWARE CONFIG MODAL */}
           {activeModal === 'hardware' && (
             <form onSubmit={handleSaveHw} className="space-y-4">
+              {isDemo && (
+                <DemoBanner message="Static configuration preview. Changes here are NOT written to a live device — saving simulates an apply action only." />
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                 <div className="space-y-1">
                   <label className="font-bold text-[#bacac5] uppercase">Target SoC Platform</label>
-                  <input 
-                    type="text" 
-                    value={hwConfig.chipset} 
+                  <input
+                    type="text"
+                    value={hwConfig.chipset}
                     readOnly
                     className="w-full bg-[#1a211f] border border-[#3c4a46] rounded p-2 text-[#dde4e1] font-mono"
                   />
                 </div>
                 <div className="space-y-1">
                   <label className="font-bold text-[#bacac5] uppercase">DSP Processing Core</label>
-                  <input 
-                    type="text" 
-                    value={hwConfig.dspCore} 
+                  <input
+                    type="text"
+                    value={hwConfig.dspCore}
+                    readOnly
+                    className="w-full bg-[#1a211f] border border-[#3c4a46] rounded p-2 text-[#dde4e1] font-mono"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="font-bold text-[#bacac5] uppercase">Audio Frontend</label>
+                  <input
+                    type="text"
+                    value={hwConfig.audioFrontend}
                     readOnly
                     className="w-full bg-[#1a211f] border border-[#3c4a46] rounded p-2 text-[#dde4e1] font-mono"
                   />
                 </div>
                 <div className="space-y-1">
                   <label className="font-bold text-[#bacac5] uppercase">Audio Sample Rate</label>
-                  <select 
+                  <select
                     value={hwConfig.sampleRateHz}
                     onChange={(e) => setHwConfig({ ...hwConfig, sampleRateHz: Number(e.target.value) })}
                     className="w-full bg-[#1a211f] border border-[#3c4a46] rounded p-2 text-[#57f1db] font-mono"
@@ -276,13 +307,18 @@ export const Modals: React.FC<ModalsProps> = ({
                     <option value={44100}>44,100 Hz (Wideband Studio)</option>
                   </select>
                 </div>
-                <div className="space-y-1">
-                  <label className="font-bold text-[#bacac5] uppercase">VAD Sensitivity Threshold</label>
+                <div className="space-y-1 md:col-span-2">
+                  <div className="flex items-baseline justify-between">
+                    <label className="font-bold text-[#bacac5] uppercase">VAD Sensitivity Threshold</label>
+                    <span className="text-[10px] text-[#859490] italic">
+                      Illustrative only — not currently applied to device firmware.
+                    </span>
+                  </div>
                   <div className="flex items-center gap-3">
-                    <input 
-                      type="range" 
-                      min="50" 
-                      max="100" 
+                    <input
+                      type="range"
+                      min="50"
+                      max="100"
                       value={hwConfig.vadSensitivity}
                       onChange={(e) => setHwConfig({ ...hwConfig, vadSensitivity: Number(e.target.value) })}
                       className="flex-1 accent-[#57f1db]"
@@ -292,15 +328,20 @@ export const Modals: React.FC<ModalsProps> = ({
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-[#3c4a46] flex items-center justify-between">
-                <label className="flex items-center gap-2 cursor-pointer text-xs">
-                  <input 
-                    type="checkbox" 
+              <div className="pt-2 border-t border-[#3c4a46] flex items-start justify-between gap-3">
+                <label className="flex items-start gap-2 cursor-pointer text-xs items-center">
+                  <input
+                    type="checkbox"
                     checked={hwConfig.beamforming}
                     onChange={(e) => setHwConfig({ ...hwConfig, beamforming: e.target.checked })}
                     className="accent-[#57f1db] rounded"
                   />
-                  <span>Enable Dual-Mic Acoustic Beamforming & Noise Suppression</span>
+                  <div className="flex flex-col">
+                    <span>Enable Dual-Mic Acoustic Beamforming &amp; Noise Suppression</span>
+                    <span className="text-[10px] text-[#859490] italic">
+                      Reserved — BOM currently uses a single INMP441 mic; beamforming requires a second mic channel on the hardware.
+                    </span>
+                  </div>
                 </label>
               </div>
 

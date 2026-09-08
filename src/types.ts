@@ -100,6 +100,8 @@ export interface HardwareConfig {
   sampleRateHz: number;
   bitDepth: number;
   quantization: string;
+  vadSensitivity: number;
+  beamforming: boolean;
 }
 
 // ── Telemetry wire-protocol event types ──────────────────────────────────────

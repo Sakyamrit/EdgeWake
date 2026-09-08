@@ -70,6 +70,23 @@ export function useEdgeWake() {
     return now.toTimeString().split(' ')[0];
   }, []);
 
+  // One-time demo-mode initialisation: populate baseline demo metrics + seed logs
+  // so the demo dashboard doesn't render with all-zero placeholders on first load.
+  const seededRef = useRef(false);
+  useEffect(() => {
+    if (dataMode !== 'demo' || seededRef.current) return;
+    seededRef.current = true;
+    setMetrics(prev => prev.ramUsedKb === 0 ? { ...prev, ...DEMO_METRICS } : prev);
+    if (logs.length === 0) {
+      const t = getCurrentTime();
+      setLogs([
+        { id: 'd1', time: t, tag: 'SYS', message: 'Initialization sequence complete', type: 'dim' },
+        { id: 'd2', time: t, tag: 'SYS', message: 'Demo mode active — telemetry WebSocket not configured.', type: 'normal' },
+        { id: 'd3', time: t, tag: 'KWS', message: 'Listener started. Demo trigger ready.', type: 'primary' },
+      ]);
+    }
+  }, [dataMode, getCurrentTime, logs.length]);
+
   const addLog = useCallback((tag: LogEntry['tag'], message: string, type: LogEntry['type']) => {
     setLogs(prev => {
       const newLog: LogEntry = {
@@ -227,17 +244,22 @@ export function useEdgeWake() {
 
 
   // --- Demo Sequence Logic ---
-  const runDemo = useCallback(() => {
-    if (dataMode !== 'demo' || !isListening) return;
+  const runDemo = useCallback((customTranscript?: string) => {
+    if (dataMode !== 'demo' || !isListening || pipelineStage !== 'listening') return;
 
     clearDemoSequence();
     setError(null);
-    setMetrics(DEMO_METRICS);
+    setMetrics(prev => ({ ...prev, ...DEMO_METRICS }));
     setLastUpdate(new Date());
 
     const t = getCurrentTime();
     const sessionId = `#${String(sessionCount + 1).padStart(4, '0')}`;
     setSessionCount(prev => prev + 1);
+
+    const finalCommand = customTranscript || "Turn on the lights in the living room.";
+    const partialText = finalCommand.length > 18
+      ? finalCommand.slice(0, 18) + "..."
+      : finalCommand;
 
     // 1. Wake detected
     setPipelineStage('wake_detected');
@@ -266,14 +288,13 @@ export function useEdgeWake() {
     // 3. Transcribing (after 700ms)
     demoSequenceRef.current.push(setTimeout(() => {
       setPipelineStage('transcribing');
-      setSession(prev => prev ? { ...prev, transcript: "Turn on the...", finalState: 'transcribing' } : null);
-      addLog('ASR', `Speech recognition partial: "Turn on the..."`, 'primary');
+      setSession(prev => prev ? { ...prev, transcript: partialText, finalState: 'transcribing' } : null);
+      addLog('ASR', `Speech recognition partial: "${partialText}"`, 'primary');
     }, 700));
 
     // 4. Complete (after 1100ms)
     demoSequenceRef.current.push(setTimeout(() => {
       setPipelineStage('complete');
-      const finalCommand = "Turn on the lights in the living room.";
       setSession(prev => prev ? { 
         ...prev, 
         transcript: finalCommand, 
@@ -304,7 +325,7 @@ export function useEdgeWake() {
       addLog('KWS', 'Neural engine reset. Awaiting next wake signature.', 'dim');
     }, 2800));
 
-  }, [dataMode, isListening, sessionCount, getCurrentTime, addLog, clearDemoSequence]);
+  }, [dataMode, isListening, pipelineStage, sessionCount, getCurrentTime, addLog, clearDemoSequence]);
 
   const stopDemo = useCallback(() => {
     clearDemoSequence();
@@ -314,6 +335,20 @@ export function useEdgeWake() {
   const toggleListening = useCallback(() => {
       setIsListening(!isListening);
   }, [isListening]);
+
+  // Demo-only OTA simulation (no hardware effect — updates demo metrics + logs)
+  const simulateDemoOta = useCallback(() => {
+    if (dataMode !== 'demo') return;
+    addLog('SYS', 'OTA firmware update committed. Neural weights flashed.', 'primary');
+    setMetrics(prev => ({
+      ...prev,
+      ramUsedKb: 178,
+      inferenceLatencyMs: 36,
+      asrLatencyMs: prev.asrLatencyMs ?? 421,
+      networkLatencyMs: prev.networkLatencyMs ?? 120,
+      totalLatencyMs: 580,
+    }));
+  }, [dataMode, addLog]);
 
 
   return {
@@ -332,6 +367,8 @@ export function useEdgeWake() {
     stopDemo,
     toggleListening,
     isListening,
+    addLog,
+    simulateDemoOta,
     clearLogs: () => setLogs([])
   };
 }

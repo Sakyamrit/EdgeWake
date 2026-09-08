@@ -15,7 +15,9 @@ import {
   Play,
   RotateCw,
   Sparkles,
-  Sliders
+  Sliders,
+  AlertTriangle,
+  XCircle
 } from 'lucide-react';
 import { BenchmarkTelemetryRow, NoiseEnvironment } from '../types';
 
@@ -30,49 +32,49 @@ export const Benchmarks: React.FC = () => {
       id: 'ram',
       metric: 'RAM Used',
       target: '<256KB',
-      latestResult: selectedModel === 'v3.0-preview' ? '210KB' : selectedModel === 'v2.3-standard' ? '198KB' : '184KB',
-      status: 'Pass',
-      notes: 'Peak memory during inference loop',
+      latestResult: null,
+      status: 'NOT_MEASURED',
+      notes: 'Target threshold. Peak memory during inference loop — to be populated by test harness.',
     },
     {
       id: 'cpu',
       metric: 'Idle CPU',
       target: '<10%',
-      latestResult: selectedModel === 'v3.0-preview' ? '9.1%' : '8.2%',
-      status: 'Pass',
-      notes: 'Measured on core 0',
+      latestResult: null,
+      status: 'NOT_MEASURED',
+      notes: 'Target threshold. Measured on core 0 — to be populated by test harness.',
     },
     {
       id: 'kws-tp',
       metric: 'KWS True-Positive',
       target: '98%',
-      latestResult: selectedModel === 'v3.0-preview' ? '98.8%' : selectedModel === 'v2.3-standard' ? '96.2%' : '97.5%',
-      status: 'Pass',
-      notes: 'Within acceptable margin',
+      latestResult: null,
+      status: 'NOT_MEASURED',
+      notes: 'Target threshold. Within acceptable margin — to be populated by test harness.',
     },
     {
       id: 'false-act',
       metric: 'False Activation',
       target: '<1/day',
-      latestResult: selectedModel === 'v3.0-preview' ? '0.2' : '0.4',
-      status: 'Pass',
-      notes: 'Normalized over 72h test',
+      latestResult: null,
+      status: 'NOT_MEASURED',
+      notes: 'Target threshold. Normalized over 72h test — to be populated by test harness.',
     },
     {
       id: 'det-lat',
       metric: 'Detection Latency',
       target: '<100ms',
-      latestResult: selectedModel === 'v3.0-preview' ? '38ms' : '42ms',
-      status: 'Pass',
-      notes: 'Audio buffer to trigger event',
+      latestResult: null,
+      status: 'NOT_MEASURED',
+      notes: 'Target threshold. Audio buffer to trigger event — to be populated by test harness.',
     },
     {
       id: 'e2e',
       metric: 'End-to-End',
       target: '<1s',
-      latestResult: selectedModel === 'v3.0-preview' ? '580ms' : '612ms',
-      status: 'Pass',
-      notes: 'Including network handoff',
+      latestResult: null,
+      status: 'NOT_MEASURED',
+      notes: 'Target threshold. Including network handoff — to be populated by test harness.',
     },
   ];
 
@@ -81,32 +83,32 @@ export const Benchmarks: React.FC = () => {
       id: 'quiet-room',
       title: 'Quiet Room',
       icon: 'home',
-      oneMeterAccuracy: selectedModel === 'v3.0-preview' ? 99.6 : 99.2,
-      threeMeterAccuracy: selectedModel === 'v3.0-preview' ? 99.0 : 98.5,
+      oneMeterAccuracy: null,
+      threeMeterAccuracy: null,
       accentColor: 'secondary',
     },
     {
       id: 'office-fan',
       title: 'Office Fan',
       icon: 'fan',
-      oneMeterAccuracy: selectedModel === 'v3.0-preview' ? 98.5 : 97.8,
-      threeMeterAccuracy: selectedModel === 'v3.0-preview' ? 95.8 : 94.1,
+      oneMeterAccuracy: null,
+      threeMeterAccuracy: null,
       accentColor: 'secondary',
     },
     {
       id: 'multi-speaker',
       title: 'Multiple Speakers',
       icon: 'users',
-      oneMeterAccuracy: selectedModel === 'v3.0-preview' ? 96.9 : 95.4,
-      threeMeterAccuracy: selectedModel === 'v3.0-preview' ? 91.4 : 89.2,
+      oneMeterAccuracy: null,
+      threeMeterAccuracy: null,
       accentColor: 'tertiary',
     },
     {
       id: 'traffic',
       title: 'Traffic Bkgd',
       icon: 'car',
-      oneMeterAccuracy: selectedModel === 'v3.0-preview' ? 94.2 : 92.1,
-      threeMeterAccuracy: selectedModel === 'v3.0-preview' ? 88.3 : 85.6,
+      oneMeterAccuracy: null,
+      threeMeterAccuracy: null,
       accentColor: 'tertiary',
     },
   ];
@@ -128,8 +130,6 @@ export const Benchmarks: React.FC = () => {
     setIsBenchmarking(true);
     setTimeout(() => {
       setIsBenchmarking(false);
-      const now = new Date();
-      setBenchmarkDate(now.toISOString().split('T')[0]);
     }, 1200);
   };
 
@@ -152,6 +152,7 @@ export const Benchmarks: React.FC = () => {
             id="btn-run-suite"
             onClick={handleRunBenchmark}
             disabled={isBenchmarking}
+            title="Demo-only button. Real test results require a connected test harness and target hardware."
             className="bg-[#2dd4bf] text-[#003731] hover:bg-[#57f1db] px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
           >
             {isBenchmarking ? (
@@ -159,7 +160,7 @@ export const Benchmarks: React.FC = () => {
             ) : (
               <Play className="w-3.5 h-3.5 fill-current" />
             )}
-            <span>{isBenchmarking ? 'Running Suite...' : 'Run Test Suite'}</span>
+            <span>{isBenchmarking ? 'Simulating...' : 'Demo · Run Test Suite'}</span>
           </button>
 
           <div className="flex gap-2 bg-[#1a211f] border border-[#3c4a46] rounded-lg p-1.5 items-center shadow-xs">
@@ -186,12 +187,13 @@ export const Benchmarks: React.FC = () => {
             <div className="px-2.5 py-0.5 flex items-center gap-2 border-r border-[#3c4a46]/50">
               <Cpu className="w-4 h-4 text-[#bacac5]" />
               <div className="flex flex-col">
-                <span className="text-[9px] font-bold text-[#bacac5] uppercase tracking-wider">
+                <span className="text-[9px] font-bold text-[#bacac5] uppercase tracking-wider" title="Model selector retained for future use — results not yet populated per model.">
                   Model
                 </span>
                 <select
                   value={selectedModel}
                   onChange={(e) => setSelectedModel(e.target.value as any)}
+                  title="Future use only. Benchmark results below are NOT_MEASURED and do not change per model."
                   className="font-mono text-[#57f1db] text-xs bg-transparent border-none p-0 focus:ring-0 cursor-pointer font-medium"
                 >
                   <option value="v2.4-lite" className="bg-[#1a211f] text-[#57f1db]">v2.4-lite</option>
@@ -205,10 +207,10 @@ export const Benchmarks: React.FC = () => {
             <div className="px-2.5 py-0.5 flex items-center gap-2">
               <Calendar className="w-4 h-4 text-[#bacac5]" />
               <div className="flex flex-col">
-                <span className="text-[9px] font-bold text-[#bacac5] uppercase tracking-wider">
+                <span className="text-[9px] font-bold text-[#bacac5] uppercase tracking-wider" title="Illustrative date — not associated with real measurement run.">
                   Date
                 </span>
-                <span className="font-mono text-[#dde4e1] text-xs">
+                <span className="font-mono text-[#859490] text-xs" title="Illustrative date — not associated with real measurement run.">
                   {benchmarkDate}
                 </span>
               </div>
@@ -262,7 +264,9 @@ export const Benchmarks: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#3c4a46]/30 text-sm text-[#dde4e1]">
-              {telemetryData.map((row) => (
+              {telemetryData.map((row) => {
+                const isNotMeasured = row.status === 'NOT_MEASURED';
+                return (
                 <tr key={row.id} className="hover:bg-[#2f3634]/20 transition-colors group">
                   <td className="py-3 px-4 font-medium group-hover:text-[#57f1db] transition-colors">
                     {row.metric}
@@ -270,20 +274,40 @@ export const Benchmarks: React.FC = () => {
                   <td className="py-3 px-4 font-mono text-[#bacac5]">
                     {row.target}
                   </td>
-                  <td className="py-3 px-4 font-mono text-[#dde4e1] font-medium">
-                    {row.latestResult}
+                  <td className="py-3 px-4 font-mono font-medium">
+                    <span className={isNotMeasured ? 'text-[#859490] italic' : 'text-[#dde4e1]'}>
+                      {row.latestResult ?? '—'}
+                    </span>
                   </td>
                   <td className="py-3 px-4">
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#4edea3]/10 text-[#4edea3] border border-[#4edea3]/20 text-[10px] font-bold uppercase tracking-wider">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      {row.status}
-                    </span>
+                    {isNotMeasured ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#3c4a46]/30 text-[#859490] border border-[#3c4a46]/50 text-[10px] font-bold uppercase tracking-wider">
+                        <Sliders className="w-3.5 h-3.5" />
+                        NOT MEASURED
+                      </span>
+                    ) : row.status === 'Pass' ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#4edea3]/10 text-[#4edea3] border border-[#4edea3]/20 text-[10px] font-bold uppercase tracking-wider">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        {row.status}
+                      </span>
+                    ) : row.status === 'Warning' ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#ffd29f]/10 text-[#ffd29f] border border-[#ffd29f]/20 text-[10px] font-bold uppercase tracking-wider">
+                        <AlertTriangle className="w-3.5 h-3.5" />
+                        {row.status}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#ffb4ab]/10 text-[#ffb4ab] border border-[#ffb4ab]/20 text-[10px] font-bold uppercase tracking-wider">
+                        <XCircle className="w-3.5 h-3.5" />
+                        {row.status}
+                      </span>
+                    )}
                   </td>
                   <td className="py-3 px-4 text-[#bacac5] text-xs truncate max-w-[240px]" title={row.notes}>
                     {row.notes}
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
