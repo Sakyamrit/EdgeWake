@@ -186,24 +186,24 @@ export const Modals: React.FC<ModalsProps> = ({
                       onChange={(e) => setSelectedFirmware(e.target.value)}
                       className="w-full bg-[#1a211f] border border-[#3c4a46] rounded-lg p-2.5 text-xs text-[#57f1db] font-mono"
                     >
-                      <option value="v2.4.2-quant-int8">v2.4.2-quant-int8 (184 KB) — Production Default [97.5% Acc]</option>
-                      <option value="v2.5.0-rc1-fast">v2.5.0-rc1-fast (162 KB) — Ultra Low-Latency (32ms inference)</option>
-                      <option value="v2.3.0-high-snr">v2.3.0-high-snr (210 KB) — Maximum Noise Suppression</option>
+                      <option value="v2.4.2-quant-int8">v2.4.2-quant-int8 — placeholder firmware profile</option>
+                      <option value="v2.5.0-rc1-fast">v2.5.0-rc1-fast — future optimization profile</option>
+                      <option value="v2.3.0-high-snr">v2.3.0-high-snr — alternate tuning profile</option>
                     </select>
                   </div>
 
                   <div className="bg-[#1a211f] p-3.5 rounded-lg border border-[#3c4a46] space-y-2 text-xs">
                     <div className="flex justify-between">
                       <span className="text-[#bacac5]">Target Memory:</span>
-                      <span className="font-mono text-[#dde4e1]">184 KB / 256 KB SRAM</span>
+                      <span className="font-mono text-[#dde4e1]">&lt;256 KB SRAM</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-[#bacac5]">Flash ROM Size:</span>
-                      <span className="font-mono text-[#dde4e1]">1.2 MB Partition</span>
+                      <span className="font-mono text-[#dde4e1]">Unmeasured — requires hardware validation</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-[#bacac5]">Checksum (SHA-256):</span>
-                      <span className="font-mono text-[#57f1db] text-[11px]">8f2a...c09e</span>
+                      <span className="font-mono text-[#57f1db] text-[11px]">Demo only — not a live firmware hash</span>
                     </div>
                   </div>
 
@@ -525,13 +525,13 @@ export const Modals: React.FC<ModalsProps> = ({
                   {activeModal === 'support' ? 'EDGEWAKE Field Diagnostics & SLA' : 'Architecture & API Reference'}
                 </h4>
                 <p className="text-[#bacac5]">
-                  EDGEWAKE provides sub-50ms wake word recognition on resource-constrained microcontrollers (&lt;256KB RAM).
+                  EDGEWAKE targets sub-256KB memory usage and a low-latency local wake-word pipeline, but the project currently has no measured on-device benchmark data in this repository.
                 </p>
                 <ul className="list-disc pl-4 space-y-1 text-[#dde4e1] mt-2">
-                  <li>Pipeline Latency: ~42ms acoustic inference + 120ms network handoff</li>
-                  <li>True positive threshold: 97.5% at SNR &gt; 10dB</li>
-                  <li>Supported Wake Words: "Hi Edge", "Hey Edge", "Nova"</li>
-                  <li>OTA Channel: AES-GCM Encrypted WebSocket & Bluetooth Low Energy</li>
+                  <li>Target thresholds are defined in the PRD and benchmark table.</li>
+                  <li>Actual performance will be added after on-device testing.</li>
+                  <li>Supported wake-word examples are demo placeholders until the firmware is validated.</li>
+                  <li>Demo actions are not live OTA or hardware operations.</li>
                 </ul>
               </div>
 

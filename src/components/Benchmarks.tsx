@@ -25,7 +25,12 @@ export const Benchmarks: React.FC = () => {
   const [selectedEnv, setSelectedEnv] = useState<'Lab A' | 'Lab B (High Noise)' | 'Field Chamber'>('Lab A');
   const [selectedModel, setSelectedModel] = useState<'v2.4-lite' | 'v2.3-standard' | 'v3.0-preview'>('v2.4-lite');
   const [isBenchmarking, setIsBenchmarking] = useState(false);
-  const [benchmarkDate, setBenchmarkDate] = useState('2023-10-24');
+  const [benchmarkDate] = useState('2023-10-24');
+
+  const renderAccuracyValue = (value: number | null, fallback = 'Not measured — illustrative layout') => {
+    if (value == null) return fallback;
+    return `${value}%`;
+  };
 
   const telemetryData: BenchmarkTelemetryRow[] = [
     {
@@ -176,9 +181,9 @@ export const Benchmarks: React.FC = () => {
                   onChange={(e) => setSelectedEnv(e.target.value as any)}
                   className="font-mono text-[#57f1db] text-xs bg-transparent border-none p-0 focus:ring-0 cursor-pointer font-medium"
                 >
-                  <option value="Lab A" className="bg-[#1a211f] text-[#57f1db]">Lab A</option>
-                  <option value="Lab B (High Noise)" className="bg-[#1a211f] text-[#57f1db]">Lab B</option>
-                  <option value="Field Chamber" className="bg-[#1a211f] text-[#57f1db]">Field</option>
+                  <option value="Lab A" className="bg-[#1a211f] text-[#57f1db]">Quiet Room</option>
+                  <option value="Lab B (High Noise)" className="bg-[#1a211f] text-[#57f1db]">Office Fan</option>
+                  <option value="Field Chamber" className="bg-[#1a211f] text-[#57f1db]">Traffic</option>
                 </select>
               </div>
             </div>
@@ -193,8 +198,9 @@ export const Benchmarks: React.FC = () => {
                 <select
                   value={selectedModel}
                   onChange={(e) => setSelectedModel(e.target.value as any)}
-                  title="Future use only. Benchmark results below are NOT_MEASURED and do not change per model."
-                  className="font-mono text-[#57f1db] text-xs bg-transparent border-none p-0 focus:ring-0 cursor-pointer font-medium"
+                  title="No measured per-model benchmark data exists yet. Model comparison is intentionally disabled."
+                  disabled
+                  className="font-mono text-[#57f1db] text-xs bg-transparent border-none p-0 focus:ring-0 cursor-not-allowed font-medium opacity-70"
                 >
                   <option value="v2.4-lite" className="bg-[#1a211f] text-[#57f1db]">v2.4-lite</option>
                   <option value="v2.3-standard" className="bg-[#1a211f] text-[#57f1db]">v2.3-std</option>
@@ -253,7 +259,7 @@ export const Benchmarks: React.FC = () => {
                   Target
                 </th>
                 <th className="py-3 px-4 text-[11px] font-bold uppercase tracking-wider text-[#bacac5]">
-                  Latest Result
+                  Measured
                 </th>
                 <th className="py-3 px-4 text-[11px] font-bold uppercase tracking-wider text-[#bacac5]">
                   Status
@@ -335,23 +341,23 @@ export const Benchmarks: React.FC = () => {
               <div>
                 <div className="flex justify-between items-end mb-1">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#bacac5]">1m Distance</span>
-                  <span className="font-mono text-[#4edea3] text-sm font-semibold">
-                    {noiseEnvironments[0].oneMeterAccuracy}%
+                  <span className="font-mono text-[#859490] text-xs font-semibold">
+                    {renderAccuracyValue(noiseEnvironments[0].oneMeterAccuracy, 'Not measured')}
                   </span>
                 </div>
                 <div className="w-full bg-[#2f3634] h-1.5 rounded-full overflow-hidden">
-                  <div className="bg-[#4edea3] h-full rounded-full transition-all duration-500" style={{ width: `${noiseEnvironments[0].oneMeterAccuracy}%` }} />
+                  <div className="bg-[#3c4a46] h-full rounded-full transition-all duration-500" style={{ width: noiseEnvironments[0].oneMeterAccuracy == null ? '0%' : '0%' }} />
                 </div>
               </div>
               <div>
                 <div className="flex justify-between items-end mb-1">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#bacac5]">3m Distance</span>
-                  <span className="font-mono text-[#57f1db] text-sm font-semibold">
-                    {noiseEnvironments[0].threeMeterAccuracy}%
+                  <span className="font-mono text-[#859490] text-xs font-semibold">
+                    {renderAccuracyValue(noiseEnvironments[0].threeMeterAccuracy, 'Not measured')}
                   </span>
                 </div>
                 <div className="w-full bg-[#2f3634] h-1.5 rounded-full overflow-hidden">
-                  <div className="bg-[#57f1db] h-full rounded-full transition-all duration-500" style={{ width: `${noiseEnvironments[0].threeMeterAccuracy}%` }} />
+                  <div className="bg-[#3c4a46] h-full rounded-full transition-all duration-500" style={{ width: noiseEnvironments[0].threeMeterAccuracy == null ? '0%' : '0%' }} />
                 </div>
               </div>
             </div>
@@ -368,23 +374,23 @@ export const Benchmarks: React.FC = () => {
               <div>
                 <div className="flex justify-between items-end mb-1">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#bacac5]">1m Distance</span>
-                  <span className="font-mono text-[#4edea3] text-sm font-semibold">
-                    {noiseEnvironments[1].oneMeterAccuracy}%
+                  <span className="font-mono text-[#859490] text-xs font-semibold">
+                    {renderAccuracyValue(noiseEnvironments[1].oneMeterAccuracy, 'Not measured')}
                   </span>
                 </div>
                 <div className="w-full bg-[#2f3634] h-1.5 rounded-full overflow-hidden">
-                  <div className="bg-[#4edea3] h-full rounded-full transition-all duration-500" style={{ width: `${noiseEnvironments[1].oneMeterAccuracy}%` }} />
+                  <div className="bg-[#3c4a46] h-full rounded-full transition-all duration-500" style={{ width: noiseEnvironments[1].oneMeterAccuracy == null ? '0%' : '0%' }} />
                 </div>
               </div>
               <div>
                 <div className="flex justify-between items-end mb-1">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#bacac5]">3m Distance</span>
-                  <span className="font-mono text-[#57f1db] text-sm font-semibold">
-                    {noiseEnvironments[1].threeMeterAccuracy}%
+                  <span className="font-mono text-[#859490] text-xs font-semibold">
+                    {renderAccuracyValue(noiseEnvironments[1].threeMeterAccuracy, 'Not measured')}
                   </span>
                 </div>
                 <div className="w-full bg-[#2f3634] h-1.5 rounded-full overflow-hidden">
-                  <div className="bg-[#57f1db] h-full rounded-full transition-all duration-500" style={{ width: `${noiseEnvironments[1].threeMeterAccuracy}%` }} />
+                  <div className="bg-[#3c4a46] h-full rounded-full transition-all duration-500" style={{ width: noiseEnvironments[1].threeMeterAccuracy == null ? '0%' : '0%' }} />
                 </div>
               </div>
             </div>
@@ -401,23 +407,23 @@ export const Benchmarks: React.FC = () => {
               <div>
                 <div className="flex justify-between items-end mb-1">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#bacac5]">1m Distance</span>
-                  <span className="font-mono text-[#4edea3] text-sm font-semibold">
-                    {noiseEnvironments[2].oneMeterAccuracy}%
+                  <span className="font-mono text-[#859490] text-xs font-semibold">
+                    {renderAccuracyValue(noiseEnvironments[2].oneMeterAccuracy, 'Not measured')}
                   </span>
                 </div>
                 <div className="w-full bg-[#2f3634] h-1.5 rounded-full overflow-hidden">
-                  <div className="bg-[#4edea3] h-full rounded-full transition-all duration-500" style={{ width: `${noiseEnvironments[2].oneMeterAccuracy}%` }} />
+                  <div className="bg-[#3c4a46] h-full rounded-full transition-all duration-500" style={{ width: noiseEnvironments[2].oneMeterAccuracy == null ? '0%' : '0%' }} />
                 </div>
               </div>
               <div>
                 <div className="flex justify-between items-end mb-1">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#bacac5]">3m Distance</span>
-                  <span className="font-mono text-[#ffd29f] text-sm font-semibold">
-                    {noiseEnvironments[2].threeMeterAccuracy}%
+                  <span className="font-mono text-[#859490] text-xs font-semibold">
+                    {renderAccuracyValue(noiseEnvironments[2].threeMeterAccuracy, 'Not measured')}
                   </span>
                 </div>
                 <div className="w-full bg-[#2f3634] h-1.5 rounded-full overflow-hidden">
-                  <div className="bg-[#ffd29f] h-full rounded-full transition-all duration-500" style={{ width: `${noiseEnvironments[2].threeMeterAccuracy}%` }} />
+                  <div className="bg-[#3c4a46] h-full rounded-full transition-all duration-500" style={{ width: noiseEnvironments[2].threeMeterAccuracy == null ? '0%' : '0%' }} />
                 </div>
               </div>
             </div>
@@ -434,23 +440,23 @@ export const Benchmarks: React.FC = () => {
               <div>
                 <div className="flex justify-between items-end mb-1">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#bacac5]">1m Distance</span>
-                  <span className="font-mono text-[#4edea3] text-sm font-semibold">
-                    {noiseEnvironments[3].oneMeterAccuracy}%
+                  <span className="font-mono text-[#859490] text-xs font-semibold">
+                    {renderAccuracyValue(noiseEnvironments[3].oneMeterAccuracy, 'Not measured')}
                   </span>
                 </div>
                 <div className="w-full bg-[#2f3634] h-1.5 rounded-full overflow-hidden">
-                  <div className="bg-[#4edea3] h-full rounded-full transition-all duration-500" style={{ width: `${noiseEnvironments[3].oneMeterAccuracy}%` }} />
+                  <div className="bg-[#3c4a46] h-full rounded-full transition-all duration-500" style={{ width: noiseEnvironments[3].oneMeterAccuracy == null ? '0%' : '0%' }} />
                 </div>
               </div>
               <div>
                 <div className="flex justify-between items-end mb-1">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#bacac5]">3m Distance</span>
-                  <span className="font-mono text-[#ffd29f] text-sm font-semibold">
-                    {noiseEnvironments[3].threeMeterAccuracy}%
+                  <span className="font-mono text-[#859490] text-xs font-semibold">
+                    {renderAccuracyValue(noiseEnvironments[3].threeMeterAccuracy, 'Not measured')}
                   </span>
                 </div>
                 <div className="w-full bg-[#2f3634] h-1.5 rounded-full overflow-hidden">
-                  <div className="bg-[#ffd29f] h-full rounded-full transition-all duration-500" style={{ width: `${noiseEnvironments[3].threeMeterAccuracy}%` }} />
+                  <div className="bg-[#3c4a46] h-full rounded-full transition-all duration-500" style={{ width: noiseEnvironments[3].threeMeterAccuracy == null ? '0%' : '0%' }} />
                 </div>
               </div>
             </div>
@@ -462,7 +468,7 @@ export const Benchmarks: React.FC = () => {
       <div className="mt-8 p-4 border-t border-[#3c4a46]/50 flex items-start gap-3 bg-[#161d1b]/40 rounded-lg">
         <Info className="w-4 h-4 text-[#bacac5] mt-0.5 shrink-0" />
         <p className="text-xs text-[#bacac5] leading-relaxed">
-          Methodology Note: Metrics are measured telemetry from on-device logs. Evaluation speakers were held out from training sets to ensure unbiased accuracy representation across varied acoustic environments. Latency values represent P95 network conditions.
+          Methodology Note: This table shows target thresholds. Actual measured results will be added after on-device testing.
         </p>
       </div>
     </div>

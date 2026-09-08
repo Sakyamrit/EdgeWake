@@ -27,10 +27,10 @@ export default function App() {
 
   // ── Uptime ticker ────────────────────────────────────────────────────────
   useEffect(() => {
-    const timer = setInterval(() => {
-      setUptimeSeconds(prev => prev + 1);
+    const timer = window.setInterval(() => {
+      setUptimeSeconds((prev: number) => prev + 1);
     }, 1000);
-    return () => clearInterval(timer);
+    return () => window.clearInterval(timer);
   }, []);
 
   // Format current time HH:MM:SS
@@ -46,7 +46,7 @@ export default function App() {
   const toggleRealAudio = async () => {
     if (isRealAudioActive) {
       if (mediaStreamRef.current) {
-        mediaStreamRef.current.getTracks().forEach(t => t.stop());
+        mediaStreamRef.current.getTracks().forEach((t: MediaStreamTrack) => t.stop());
       }
       if (animFrameRef.current) {
         cancelAnimationFrame(animFrameRef.current);
@@ -139,7 +139,7 @@ export default function App() {
             uptimeSeconds={uptimeSeconds}
             isListening={edge.isListening}
             onToggleListening={edge.toggleListening}
-            onSimulateTrigger={(cmd) => edge.runDemo(cmd)}
+            onSimulateTrigger={(cmd?: string) => edge.runDemo(cmd)}
             currentStage={edge.pipelineStage}
             logs={edge.logs}
             onClearLogs={edge.clearLogs}

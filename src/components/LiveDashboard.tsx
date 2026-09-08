@@ -419,7 +419,7 @@ export const LiveDashboard: React.FC<LiveDashboardProps> = ({
                   {currentStage === 'error'
                     ? 'Pipeline Error'
                     : !isDemo
-                      ? currentStage === 'connecting'
+                      ? connectionState === 'connecting'
                         ? 'Connecting...'
                         : currentStage === 'listening'
                           ? 'Awaiting Device'
@@ -577,7 +577,7 @@ export const LiveDashboard: React.FC<LiveDashboardProps> = ({
                 </span>
                 <div className="flex flex-col">
                   <span className="font-mono text-[#dde4e1] text-sm font-semibold">
-                    {fmtNum(metrics.cpuIdlePercent.toFixed(1))}%
+                    {fmtNum(Number(metrics.cpuIdlePercent.toFixed(1)))}%
                   </span>
                   <span className="text-[10px] text-[#859490]">
                     ({metrics.cpuIdlePercent <= 10 ? '≤ 10% target' : 'Above target'})
@@ -913,7 +913,7 @@ export const LiveDashboard: React.FC<LiveDashboardProps> = ({
               </span>
             </div>
             <span className="text-[10px] font-mono bg-[#4edea3]/10 px-2 py-0.5 rounded border border-[#4edea3]/20 text-[#4edea3]">
-              TARGET: &lt;1000ms {displayTotal != null && displayTotal < 1000 ? '(PASS)' : displayTotal == null ? '' : '(MEASURED)'}
+              TARGET: &lt;1000ms
             </span>
           </div>
 
